@@ -1,10 +1,18 @@
 import pytest
-from boundaries import convertBearingToDecimalDegree
+from boundaries import convertAzimuthToDecimalDegree
+
+def test_AziToDecimal():
+    quad = ''
+    deg = 0
+    min = 0
+    sec = 0
+    result = convertAzimuthToDecimalDegree(quad,deg,min,sec)
+    assert result == 0
 
 def test_invalid_bearing():
     bearing = "NXX°YY'ZZ\"E"
     with pytest.raises(ValueError):
-        convertBearingToDecimalDegree(None, bearing)
+        convertAzimuthToDecimalDegree(None, bearing)
 
 from boundaries import parseBearing
 
