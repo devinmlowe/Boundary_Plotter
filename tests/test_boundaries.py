@@ -1,27 +1,42 @@
-import pytest
-from boundaries import convertAzimuthToDecimalDegree
+"""
+tests for the boundaries.py module
+"""
 
-def test_AziToDecimal():
-    quad = ''
-    deg = 0
-    min = 0
-    sec = 0
-    result = convertAzimuthToDecimalDegree(quad,deg,min,sec)
-    assert result == 0
+from boundaries import parse_bearing
 
-def test_invalid_bearing():
-    bearing = "NXX°YY'ZZ\"E"
-    with pytest.raises(ValueError):
-        convertAzimuthToDecimalDegree(None, bearing)
+def test_parse_bearing_with_quad():
+    """Tests output with Quadrant Supplied"""
+    input_bearing ="N32°10'32\"E"
+    result = parse_bearing(bearing=input_bearing)
+    assert result == 32.175556
 
-from boundaries import parseBearing
+def test_parse_bearing_without_quad():
+    """Tests output without Quadrant Supplied"""
+    input_bearing ="32°10'32\""
+    result = parse_bearing(bearing=input_bearing)
+    assert result == 32.175556
 
-def test_parseBearing_1():
-    bearing = "N45°30'25\"E"
-    result = parseBearing(bearing)
-    assert result== ["NE",45,30,25]
-def test_parseBearing_asterisk():
-    bearing = "N45*30'25\"E"
-    result = parseBearing(bearing)
-    assert result== ["NE",45,30,25]
+def test_parse_bearing_southeast():
+    """Tests for adjustment of degree value based on SouthEast Quadrant"""
+    input_bearing ="S70°E"
+    result = parse_bearing(bearing=input_bearing)
+    assert result == 110.000000
+
+def test_parse_bearing_southwest():
+    """Tests for adjustment of degree value based on Southwest Quadrant"""
+    input_bearing ="S45°32'W"
+    result = parse_bearing(bearing=input_bearing)
+    assert result == 225.533333
+
+def test_parse_bearing_northwest():
+    """Tests for adjustment of degree value based on Northwest Quadrant"""
+    input_bearing ="N60°45'10\"W"
+    result = parse_bearing(bearing=input_bearing)
+    assert result == 299.247222
+
+def test_parse_bearing_asterisk():
+    """Tests for successful substitution of * with °"""
+    input_bearing ="N60*45'10\"W"
+    result = parse_bearing(bearing=input_bearing)
+    assert result == 299.247222
     

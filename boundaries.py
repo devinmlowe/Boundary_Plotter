@@ -1,126 +1,58 @@
 """Tools to Parse Bearing and Distance Calls into Vectors, Coordinates, and Lines."""
 
-
-def convertAzimuthToDecimalDegree(quad: str=None, deg: int=0, min: int=0, sec: int=0,bearing: str=None):
-    """
-    The function takes a parsed data from a bearing (e.g., "N45°30'25\"E") and returns the azimuth
-    represented as a decimal degree value.
-
-    Args:
-        quad (str): Quadrant as a string (e.g., "NE") or None if no quadrant is supplied.
-        deg (int): Degrees as an integer.
-        min (int): Minutes as an integer.
-        sec (int): Seconds as an integer.
-
-    Returns:
-        DecimalDegree: The provided Azimuth as a decimal degree, adjusted for quadrant if supplied
-
-    Examples:
-        Azimuth with no Quadrant and all zeroes should point to north, or 0° and recieve no additional correction based on Quadrant
-        >>> convertAzimuthToDecimalDegree(None,0,0,0)
-        0.000000
-
-        Azimuth to North-East Quadrant should be 0.000000
-        >>> convertAzimuthToDecimalDegree("NE",0,0,0)
-        0.000000
-
-        Azimuth to South-East Quadrant should be 90.000000
-        >>> convertAzimuthToDecimalDegree("SE",0,0,0)
-        90.000000
-
-        Azimuth to South-West Quadrant should be 180.000000
-        >>> convertAzimuthToDecimalDegree("SW",0,0,0)
-        180.000000
-
-        Azimuth to North-West Quadrant should be 270.000000
-        >>> convertAzimuthToDecimalDegree("NW",0,0,0)
-        270.000000
-    """
-
-    # Determine adjustment based on Quadrant
-    if not quad:
-        """No Adjustment for pure azimuth"""
-        
-    elif quad.startswith("N"):    
-        
-        if quad.endswith("E"):
-            """In the Northeast quadrant the Azimuth and Bearing is the same"""
-
-        elif quad.endswith("W"):  
-            """
-            In the Northwest quadrant, subtract the Bearing from 360 degrees to get the Azimuth:
-            `360 - N51*25'41"W = AZ 308*34'19"`
-            """
-    
-    elif quad.startswith("S"):
-    
-        if quad.endswith("E"):
-            """
-            In the Southeast quadrant, subtract the Bearing from 180 degrees to get the Azimuth:
-            `180* - S51*25'13"E = AZ 128*34'47"`
-            """
-    
-        elif quad.endswith("W"):
-            """
-            In the Southwest quadrant, add the Bearing to 180 degrees to get the Azimuth:
-            `S46*20'30"W + 180 = AZ 226*20'30"`
-            >>>convertAzimuthToDecimalDegree(None,0,0,0)
-            0
-            """
-    return None
-
-
-def parseBearing(bearing):
+def parse_bearing(bearing):
     r"""
-    Parse a bearing into its constituent degrees, minutes, and seconds.
+    Parses a Bearing call (e.g., `N45°30'25"E` or `45°30'25"`) and returns a decimal azimuth degree
 
-    The function takes a bearing string (e.g., "N45°30'25\"E") and returns a list
-    containing the quadrant (e.g., "NE"), degrees, minutes, and seconds.
+    # Args:
+        `bearing: (str)` 
+            - The bearing string to be parsed
+            - Can be supplied with or without the `Departure` (N/S) and `Latitude` (E/W)
+            - If `Departure` and `Latitude` are not supplied, the function assumes an north azimuth 
 
-    Args:
-        bearing (str): The bearing string to parse.
-
-    Returns:
-        list: A list containing:
-            - Quadrant as a string (e.g., "NE") or None if no quadrant is supplied.
-            - Degrees as an integer.
-            - Minutes as an integer.
-            - Seconds as an integer.
-
-    Examples:
-        >>> parseBearing("N45°30'25\"E")
-        ['NE', 45, 30, 25]
-
-        >>> parseBearing("S10°15'50\"W")
-        ['SW', 10, 15, 50]
-
-        >>> parseBearing("N00°00'00\"W")
-        ['NW', 0, 0, 0]
-        
-        Check for * Asterisk substitution success:
-        >>> parseBearing("N45*30'25\"E")
-        ['NE', 45, 30, 25]
-
-        Check for empty or missing values:
-        >>> parseBearing("N45*E")
-        ['NE', 45, 0, 0]
-        
-        Function will return None for the quadrant if departure and latitude are not supplied:
-        >>> parseBearing("45*30'25\"")
-        [None, 45, 30, 25]
-    """
+    # Returns:
+        `Degree: (float)` The converted Bearing as a decimal degree value rounded to the 6th decimal
     
+    # Examples:
+    
+        # Output should be valid when a Quadrant (ie. "NE") is supplied:
+        >>> parse_bearing("N32°10'32\"E")
+        32.175556
+
+        # Output should be valid when a Quadrant (ie. "NE") is *not* supplied:
+
+        >>> parse_bearing("32°10'32\"")
+        32.175556
+
+        # Output should be valid when * is substituted for the ° symbol:
+        >>> parse_bearing("N60*45'10\"W")
+        299.247222
+
+        # In the Southeast Quadrant, the azimuth is equal to 180° less the Bearing:
+        >>> parse_bearing("S70°E")
+        110.0
+     
+        # In the Southwest Quadrant, the azimuth is equal to 180° plus the bearing:
+        >>> parse_bearing("S45°32'W")
+        225.533333
+
+        # In the Northwest Quadrant, the azimuth is qual to 360° less the Bearing:
+        >>> parse_bearing("N60°45'10\"W")
+        299.247222
+
+    """
+
     # Replace * with °
     bearing = bearing.replace("*", "°")
-    
+
     # Check for quadrant indicators (N/S and E/W)
     quad = None
     if len(bearing) > 1 and bearing[0] in "NS" and bearing[-1] in "EW":
         quad = bearing[0] + bearing[-1]
         bearing = bearing[1:-1]  # Remove quadrant indicators from the string
-    
+
     # Extract degrees
-    try:    
+    try:
         deg = int(bearing[:bearing.find("°")])
     except ValueError:
         deg = 0
@@ -128,25 +60,36 @@ def parseBearing(bearing):
     # Extract minutes, only if they exist
     min_index = bearing.find("°")+1
     if min_index < len(bearing) and "\'" in bearing:
-        
+
         try:
-            min = int(bearing[bearing.find("°") + 1:bearing.find("'")]) 
+            deg_min = int(bearing[bearing.find("°") + 1:bearing.find("'")])
         except ValueError:
-            min = 0
+            deg_min = 0
     else:
-        min = 0
+        deg_min = 0
 
     # Extract seconds, only if they exist
     sec_index = bearing.find("'") + 1
     if sec_index < len(bearing) and '"' in bearing:
         try:
-            sec = int(bearing[sec_index:bearing.find('"')])
+            deg_sec = int(bearing[sec_index:bearing.find('"')])
         except ValueError:
-            sec = 0
+            deg_sec = 0
     else:
-        sec = 0
+        deg_sec = 0
 
-    return [quad, deg, min, sec]
+    decimal_degree: float = deg + (deg_min/60) + (deg_sec/3600)
+
+    if quad == "SE":
+        adjusted_degree: float = 180 - decimal_degree
+    elif quad == "SW":
+        adjusted_degree: float = 180 + decimal_degree
+    elif quad == "NW":
+        adjusted_degree: float = 360 - decimal_degree
+    else:
+        adjusted_degree: float = decimal_degree
+
+    return round(adjusted_degree,6)
 
 if __name__ == "__main__":
     import doctest
