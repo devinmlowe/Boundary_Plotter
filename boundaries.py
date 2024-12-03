@@ -46,12 +46,11 @@ def parseBearing(bearing):
     containing the quadrant (e.g., "NE"), degrees, minutes, and seconds.
 
     Args:
-        self: The instance of the class (if this is a method of a class).
         bearing (str): The bearing string to parse.
 
     Returns:
         list: A list containing:
-            - Quadrant as a string (e.g., "NE").
+            - Quadrant as a string (e.g., "NE") or None if no quadrant is supplied.
             - Degrees as an integer.
             - Minutes as an integer.
             - Seconds as an integer.
@@ -66,7 +65,7 @@ def parseBearing(bearing):
         >>> parseBearing("N00°00'00\"W")
         ['NW', 0, 0, 0]
         
-        Check for * Asterisk substition success:
+        Check for * Asterisk substitution success:
         >>> parseBearing("N45*30'25\"E")
         ['NE', 45, 30, 25]
         
@@ -74,29 +73,48 @@ def parseBearing(bearing):
         >>> parseBearing("N45*E")
         ['NE', 45, 0, 0]
         
-        Function will return regular azimuth value if departure and latitude are not supplied:
+        Function will return None for the quadrant if departure and latitude are not supplied:
         >>> parseBearing("45*30'25\"")
-        ['', 45, 30, 25]
-        
+        [None, 45, 30, 25]
     """
     
+    # Replace * with °
     bearing = bearing.replace("*", "°")
     
-    quad = bearing[0] + bearing[-1]
+    # Check for quadrant indicators (N/S and E/W)
+    quad = None
+    if len(bearing) > 1 and bearing[0] in "NS" and bearing[-1] in "EW":
+        quad = bearing[0] + bearing[-1]
+        bearing = bearing[1:-1]  # Remove quadrant indicators from the string
+    
+    # Extract degrees
     try:    
-        deg = int(bearing[1:bearing.find("°")])
-    except:
+        deg = int(bearing[:bearing.find("°")])
+    except ValueError:
         deg = 0
+
+    # Extract minutes, only if they exist
+    min_index = bearing.find("°")+1
+    if min_index < len(bearing) and "\'" in bearing:
+        
     try:
         min = int(bearing[bearing.find("°") + 1:bearing.find("'")]) 
-    except:
+    except ValueError:
         min = 0
-    try: 
-        sec = int(bearing[bearing.find("'") + 1:bearing.find('"')])
-    except:
+    else:
+        min = 0
+
+    # Extract seconds, only if they exist
+    sec_index = bearing.find("'") + 1
+    if sec_index < len(bearing) and '"' in bearing:
+        try:
+            sec = int(bearing[sec_index:bearing.find('"')])
+        except ValueError:
+            sec = 0
+    else:
         sec = 0
     return [quad, deg, min, sec]
-   
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod(verbose=True)
