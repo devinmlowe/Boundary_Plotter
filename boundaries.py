@@ -40,7 +40,7 @@ def convertAzimuthToDecimalDegree(quad: str, deg: int, min: int, sec: int):
     """
 
     # Determine adjustment based on Quadrant
-    if quad == None:
+    if not quad:
         """No Adjustment for pure azimuth"""
     if quad == "NE":
         """In the Northeast quadrant the Azimuth and Bearing is the same"""
@@ -53,8 +53,8 @@ def convertAzimuthToDecimalDegree(quad: str, deg: int, min: int, sec: int):
         """
         In the Southwest quadrant, add the Bearing to 180 degrees to get the Azimuth:
         `S46*20'30"W + 180 = AZ 226*20'30"`
-        >>>print("test")
-        test
+        >>>convertAzimuthToDecimalDegree(None,0,0,0)
+        0
         """
     if quad == "NW":
         """
@@ -91,7 +91,7 @@ def parseBearing(bearing):
 
         >>> parseBearing("N00°00'00\"W")
         ['NW', 0, 0, 0]
-
+        
         Check for * Asterisk substitution success:
         >>> parseBearing("N45*30'25\"E")
         ['NE', 45, 30, 25]
@@ -99,32 +99,33 @@ def parseBearing(bearing):
         Check for empty or missing values:
         >>> parseBearing("N45*E")
         ['NE', 45, 0, 0]
-
+        
         Function will return None for the quadrant if departure and latitude are not supplied:
         >>> parseBearing("45*30'25\"")
         [None, 45, 30, 25]
     """
-
+    
     # Replace * with °
     bearing = bearing.replace("*", "°")
-
+    
     # Check for quadrant indicators (N/S and E/W)
     quad = None
     if len(bearing) > 1 and bearing[0] in "NS" and bearing[-1] in "EW":
         quad = bearing[0] + bearing[-1]
         bearing = bearing[1:-1]  # Remove quadrant indicators from the string
-
+    
     # Extract degrees
-    try:
-        deg = int(bearing[: bearing.find("°")])
+    try:    
+        deg = int(bearing[:bearing.find("°")])
     except ValueError:
         deg = 0
 
     # Extract minutes, only if they exist
-    min_index = bearing.find("°") + 1
-    if min_index < len(bearing) and "'" in bearing:
+    min_index = bearing.find("°")+1
+    if min_index < len(bearing) and "\'" in bearing:
+        
         try:
-            min = int(bearing[bearing.find("°") + 1 : bearing.find("'")])
+            min = int(bearing[bearing.find("°") + 1:bearing.find("'")]) 
         except ValueError:
             min = 0
     else:
@@ -134,14 +135,13 @@ def parseBearing(bearing):
     sec_index = bearing.find("'") + 1
     if sec_index < len(bearing) and '"' in bearing:
         try:
-            sec = int(bearing[sec_index : bearing.find('"')])
+            sec = int(bearing[sec_index:bearing.find('"')])
         except ValueError:
             sec = 0
     else:
         sec = 0
 
     return [quad, deg, min, sec]
-
 
 if __name__ == "__main__":
     import doctest
