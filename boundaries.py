@@ -1,9 +1,7 @@
 """Tools to Parse Bearing and Distance Calls into Vectors, Coordinates, and Lines."""
 
-from dataclasses import dataclass
 
-
-def convertAzimuthToDecimalDegree(quad: str, deg: int, min: int, sec: int):
+def convertAzimuthToDecimalDegree(quad: str=None, deg: int=0, min: int=0, sec: int=0,bearing: str=None):
     """
     The function takes a parsed data from a bearing (e.g., "N45°30'25\"E") and returns the azimuth
     represented as a decimal degree value.
@@ -42,26 +40,33 @@ def convertAzimuthToDecimalDegree(quad: str, deg: int, min: int, sec: int):
     # Determine adjustment based on Quadrant
     if not quad:
         """No Adjustment for pure azimuth"""
-    if quad == "NE":
-        """In the Northeast quadrant the Azimuth and Bearing is the same"""
-    if quad == "SE":
-        """
-        In the Southeast quadrant, subtract the Bearing from 180 degrees to get the Azimuth:
-        `180* - S51*25'13"E = AZ 128*34'47"`
-        """
-    if quad == "SW":
-        """
-        In the Southwest quadrant, add the Bearing to 180 degrees to get the Azimuth:
-        `S46*20'30"W + 180 = AZ 226*20'30"`
-        >>>convertAzimuthToDecimalDegree(None,0,0,0)
-        0
-        """
-    if quad == "NW":
-        """
-        In the Northwest quadrant, subtract the Bearing from 360 degrees to get the Azimuth:
-        `360 - N51*25'41"W = AZ 308*34'19"`
-        """
+        
+    elif quad.startswith("N"):    
+        
+        if quad.endswith("E"):
+            """In the Northeast quadrant the Azimuth and Bearing is the same"""
 
+        elif quad.endswith("W"):  
+            """
+            In the Northwest quadrant, subtract the Bearing from 360 degrees to get the Azimuth:
+            `360 - N51*25'41"W = AZ 308*34'19"`
+            """
+    
+    elif quad.startswith("S"):
+    
+        if quad.endswith("E"):
+            """
+            In the Southeast quadrant, subtract the Bearing from 180 degrees to get the Azimuth:
+            `180* - S51*25'13"E = AZ 128*34'47"`
+            """
+    
+        elif quad.endswith("W"):
+            """
+            In the Southwest quadrant, add the Bearing to 180 degrees to get the Azimuth:
+            `S46*20'30"W + 180 = AZ 226*20'30"`
+            >>>convertAzimuthToDecimalDegree(None,0,0,0)
+            0
+            """
     return None
 
 
