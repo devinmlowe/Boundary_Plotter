@@ -2,11 +2,13 @@
 # **Survey Bearing Conversion Tool**
 
 ### **Overview**
+
 This project is a Python-based library for parsing and converting survey bearings into different formats, designed to simplify handling and visualizing survey data. These tools are foundational components for a future system to output vectors and distances in for visualization in other more full-featured tools such as **FreeCAD**, **Matplotlib**, **Excel**, and **AutoCAD**.
 
 ---
 
 ## **Features**
+
 - **Bearing Parsing**:
   - Convert quadrant bearings (e.g., `N32°10'32"E`) into decimal degrees.
   - Parse azimuths and hybrid formats into machine-readable data.
@@ -20,7 +22,9 @@ This project is a Python-based library for parsing and converting survey bearing
 ---
 
 ## **Modules**
+
 ### **angles.py**
+
 Core functionality for parsing and converting survey data.
 
 - **Key Classes**:
@@ -34,6 +38,7 @@ Core functionality for parsing and converting survey data.
 ---
 
 ## **Tests**
+
 Comprehensive test coverage is provided using `pytest` in the `test_angles.py` module. Key test cases include:
 
 - **Bearing Parsing**:
@@ -48,6 +53,7 @@ Comprehensive test coverage is provided using `pytest` in the `test_angles.py` m
   - Validation of normalized degree values.
 
 Run the tests:
+
 ```bash
 pytest test_angles.py
 ```
@@ -55,7 +61,9 @@ pytest test_angles.py
 ---
 
 ## **Examples**
-### Parsing Bearings:
+
+### Parsing Bearings
+
 ```python
 from angles import parse_bearing
 
@@ -68,7 +76,8 @@ bearing = parse_bearing("32°10'32"")
 print(bearing)  # Output: 32.175556
 ```
 
-### Converting Bearings:
+### Converting Bearings
+
 ```python
 from angles import decimal_degree_to_azimuth, decimal_degree_to_quad_bearing
 
@@ -84,12 +93,16 @@ print(quad_bearing)  # Output: 'S70°00\'00"E'
 ---
 
 ## **Installation**
+
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/survey-bearing-conversion.git
    cd survey-bearing-conversion
    ```
+
 2. Install dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -97,6 +110,7 @@ print(quad_bearing)  # Output: 'S70°00\'00"E'
 ---
 
 ## **Planned Features**
+
 - **Vector Conversion**:
   - Generate coordinate vectors from bearings and distances.
 - **Integration**:
@@ -109,9 +123,11 @@ print(quad_bearing)  # Output: 'S70°00\'00"E'
 ---
 
 ## **License**
+
 This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 ---
 
 ## **Contributing**
+
 Contributions are welcome! Please open issues or submit pull requests with improvements or bug fixes.
