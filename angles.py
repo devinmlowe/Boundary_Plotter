@@ -1,8 +1,8 @@
 """Tools to Parse Bearing and Distance Calls into Vectors, Coordinates, and Lines."""
-from dataclasses import dataclass
+import re
 from math import radians,degrees,floor
 
-@dataclass
+
 class Angle:
     """
     A representation of an angle  
@@ -111,10 +111,55 @@ class Angle:
         self.quad_bearing = None
 
 
+def parse_bearing(bearing: str) -> float:
+    """
+    Parses a bearing call into decimal degrees.
+    Supports formats like "N45°30'25\"E" or "45°30'25\"".
+    
+        # Examples:
+    
+        # Output should be valid when a Quadrant (ie. "NE") is supplied:
+        >>> round(parse_bearing("N32°10'32\"E"),6)
+        32.175556
+
+        # Output should be valid when a Quadrant (ie. "NE") is *not* supplied:
+
+        >>> round(parse_bearing("32°10'32\""),6)
+        32.175556
+
+        # Output should be valid when * is substituted for the ° symbol:
+        >>> round(parse_bearing("N60*45'10\"W"),6)
+        299.247222
+
+        # In the Southeast Quadrant, the azimuth is equal to 180° less the Bearing:
+        >>> parse_bearing("S70°E")
+        110.0
+     
+        # In the Southwest Quadrant, the azimuth is equal to 180° plus the bearing:
+        >>> round(parse_bearing("S45°32'W"),6)
+        225.533333
+
+        # In the Northwest Quadrant, the azimuth is qual to 360° less the Bearing:
+        >>> round(parse_bearing("N60°45'10\"W"),6)
+        299.247222
+    """
+    # bearing = bearing.replace("*", "°")
+    match = re.match("([NS])?([0-9]+)([[:punct:]]+)([0-9]+([[:punct:]]+))?([0-9]+([[:punct:]]+))?([EW])?", bearing)
+    if not match:
+        raise ValueError(f"Invalid bearing format: {bearing}")
+
+    departure, degrees, minutes, seconds, latitude = match.groups()
+    degrees = int(degrees) + int(minutes) / 60 + int(seconds) / 3600
+
+    if departure == "S":
+        degrees = 180 - degrees if latitude == "E" else 180 + degrees
+    elif departure == "N" and latitude == "W":
+        degrees = 360 - degrees
+
+    return degrees
 
 
-
-def parse_bearing(bearing):
+def parse_bearing_deprecated(bearing):
     r"""
     Parses a Bearing call (e.g., `N45°30'25"E` or `45°30'25"`) and returns a decimal azimuth degree
 
