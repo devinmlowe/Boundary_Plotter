@@ -9,12 +9,12 @@ class Angle:
     A representation of an angle  
    # Attributes:  
    1. `azimuth_bearing (str)` - `32°17'10"` - Degree/Minute/Seconds clockwise from True North
-   2. `quad_bearing (str)` - `N32°17'10"E` - Degree/Minute/Seconds with Departure (N/S) and Latitude (E/W)
+   2. `quad_bearing (str)` - `N32°17'10"E` - Degree/Minute/Seconds, Departure (N/S), Latitude (E/W)
    3. `decimal_degree (float)` - `32.286111...` - Degrees as decimal clockwise from True North
    3. `radian (float)` - 
    
     """
-    
+
     def __init__(self, azimuth_bearing: str = None,
                  quad_bearing: str = None,
                  decimal_degree: float = None,
@@ -120,16 +120,16 @@ def parse_bearing(bearing: str) -> float:
         # Examples:
     
         # Output should be valid when a Quadrant (ie. "NE") is supplied:
-        >>> round(parse_bearing("N32°10'32\"E"),6)
+        >>> round(parse_bearing(r'''N32°10'32"E'''),6)
         32.175556
 
         # Output should be valid when a Quadrant (ie. "NE") is *not* supplied:
 
-        >>> round(parse_bearing("32°10'32\""),6)
+        >>> round(parse_bearing(r'''32°10'32"'''),6)
         32.175556
 
         # Output should be valid when * is substituted for the ° symbol:
-        >>> round(parse_bearing("N60*45'10\"W"),6)
+        >>> round(parse_bearing(r'''N60*45'10"W'''),6)
         299.247222
 
         # In the Southeast Quadrant, the azimuth is equal to 180° less the Bearing:
@@ -141,9 +141,10 @@ def parse_bearing(bearing: str) -> float:
         225.533333
 
         # In the Northwest Quadrant, the azimuth is qual to 360° less the Bearing:
-        >>> round(parse_bearing("N60°45'10\"W"),6)
+        >>> round(parse_bearing(r'''N60°45'10"W'''),6)
         299.247222
     """
+
     pattern = re.compile(r'''
                         (?<departure>[NS])?
                         (?<degrees>[0-9]+)([[:punct:]]+)
@@ -154,26 +155,8 @@ def parse_bearing(bearing: str) -> float:
 
     match = pattern.match(bearing)
 
-    if match:
-        _degrees = match.group("degrees") or 0
-        _minutes = match.group("minutes") or 0
-        _seconds = match.group("seconds") or 0
-        decimal_degrees = int(_degrees) + int(_minutes) / 60 + int(_seconds) / 3600
-
-    if match.group("departure") == "S":
-        decimal_degrees = 180 - decimal_degrees if match.group("latitude") == "E" else 180 + decimal_degrees
-    elif match.group("departure") == "N" and match.group("latitude") == "W":
-        decimal_degrees = 360 - decimal_degrees
-    
-    pattern = re.compile(r'''
-                        (?<departure>[NS])?
-                        (?<degrees>[0-9]+)([[:punct:]]+)
-                        ((?<minutes>[0-9]+)([[:punct:]]+))?
-                        ((?<seconds>[0-9]+)([[:punct:]]+))?
-                        (?<latitude>[EW])?
-                        ''',re.VERBOSE)
-
-    match = pattern.match(bearing)
+    _departure = match.group("departure") or None
+    _latitude = match.group("latitude") or None
 
     if match:
         _degrees = match.group("degrees") or 0
@@ -181,12 +164,10 @@ def parse_bearing(bearing: str) -> float:
         _seconds = match.group("seconds") or 0
         decimal_degrees = int(_degrees) + int(_minutes) / 60 + int(_seconds) / 3600
 
-    if match.group("departure") == "S":
-        decimal_degrees = 180 - decimal_degrees if match.group("latitude") == "E" else 180 + decimal_degrees
-    elif match.group("departure") == "N" and match.group("latitude") == "W":
+    if _departure == "S":
+        decimal_degrees = 180 - decimal_degrees if _latitude == "E" else 180 + decimal_degrees
+    elif _departure == "N" and _latitude == "W":
         decimal_degrees = 360 - decimal_degrees
-
-    return decimal_degrees
 
     return decimal_degrees
 
