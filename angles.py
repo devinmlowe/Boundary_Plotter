@@ -1,6 +1,7 @@
 """Tools to Parse Bearing and Distance Calls into Vectors, Coordinates, and Lines."""
 
-from math import radians, degrees, floor
+from math import radians,degrees,floor
+
 import regex as re
 
 class Angle:
@@ -143,6 +144,26 @@ def parse_bearing(bearing: str) -> float:
         >>> round(parse_bearing("N60°45'10\"W"),6)
         299.247222
     """
+    pattern = re.compile(r'''
+                        (?<departure>[NS])?
+                        (?<degrees>[0-9]+)([[:punct:]]+)
+                        ((?<minutes>[0-9]+)([[:punct:]]+))?
+                        ((?<seconds>[0-9]+)([[:punct:]]+))?
+                        (?<latitude>[EW])?
+                        ''',re.VERBOSE)
+
+    match = pattern.match(bearing)
+
+    if match:
+        _degrees = match.group("degrees") or 0
+        _minutes = match.group("minutes") or 0
+        _seconds = match.group("seconds") or 0
+        decimal_degrees = int(_degrees) + int(_minutes) / 60 + int(_seconds) / 3600
+
+    if match.group("departure") == "S":
+        decimal_degrees = 180 - decimal_degrees if match.group("latitude") == "E" else 180 + decimal_degrees
+    elif match.group("departure") == "N" and match.group("latitude") == "W":
+        decimal_degrees = 360 - decimal_degrees
     
     pattern = re.compile(r'''
                         (?<departure>[NS])?
@@ -164,6 +185,8 @@ def parse_bearing(bearing: str) -> float:
         decimal_degrees = 180 - decimal_degrees if match.group("latitude") == "E" else 180 + decimal_degrees
     elif match.group("departure") == "N" and match.group("latitude") == "W":
         decimal_degrees = 360 - decimal_degrees
+
+    return decimal_degrees
 
     return decimal_degrees
 
