@@ -5,56 +5,114 @@ from math import radians,degrees,floor
 @dataclass
 class Angle:
     """
-    A representation of an angle
+    A representation of an angle  
+   # Attributes:  
+   1. `azimuth_bearing (str)` - `32°17'10"` - Degree/Minute/Seconds clockwise from True North
+   2. `quad_bearing (str)` - `N32°17'10"E` - Degree/Minute/Seconds with Departure (N/S) and Latitude (E/W)
+   3. `decimal_degree (float)` - `32.286111...` - Degrees as decimal clockwise from True North
+   3. `radian (float)` - 
+   
     """
-    def __init__(self, azimuth_bearing: str = None, quad_bearing: str = None,
-                 decimal_degree: float = None, radian_degree: float = None):
+    def __init__(self, azimuth_bearing: str = None,
+                 quad_bearing: str = None,
+                 decimal_degree: float = None,
+                 radian: float = None):
 
-        self.azimuth_bearing: str = azimuth_bearing
-        self.quad_bearing: str = quad_bearing
-        self.decimal_degree: float = decimal_degree
-        self.radian_degree: float = radian_degree
-
-        if not self.azimuth_bearing is None:
-            self.set_azimuth_bearing(azimuth_bearing)
-
-        elif not self.quad_bearing is None:
-            self.set_quad_bearing(quad_bearing)
-
-        elif not self.decimal_degree is None:
-            self.set_decimal_degree(decimal_degree)
-
-        elif not self.radian_degree is None:
-            self.set_radian_degree(radian_degree)
-
-    def set_decimal_degree(self,decimal_degree: float):
-        """Sets the Decimal Degree value then recalculates the other formats"""
+        self.azimuth_bearing = azimuth_bearing
+        self.quad_bearing = quad_bearing
         self.decimal_degree = decimal_degree
-        self.radian_degree = radians(self.decimal_degree)
-        self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
-        self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
+        self.radian = radian
 
-    def set_radian_degree(self,radian_degree: float):
-        """Sets the Radian Degree value then recalculates the other formats"""
-        self.radian_degree = radian_degree
-        self.decimal_degree = degrees(self.radian_degree)
-        self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
-        self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
+    @property
+    def azimuth_bearing(self):
+        """returns bearing call as degrees, minutes, seconds clockwise from true north """
+        return self.azimuth_bearing
 
-    def set_quad_bearing(self,bearing_call: str):
-        """Sets the Quadrant Bearing value then recalculates the other formats"""
-
-        self.decimal_degree = parse_bearing(bearing_call)
-        self.radian_degree = radians(self.decimal_degree)
-        self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
-        self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
-
-    def set_azimuth_bearing(self,bearing_call:str):
+    @azimuth_bearing.setter
+    def azimuth_bearing(self, bearing_call:str = None):
         """Sets the Azimuth value then recalculates the other formats"""
         self.decimal_degree = parse_bearing(bearing_call)
-        self.radian_degree = radians(self.decimal_degree)
+        self.radian = radians(self.decimal_degree)
         self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
         self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
+
+    @azimuth_bearing.deleter
+    def azimuth_bearing(self):
+        """if the azimuth bearing value is deleted, all other values are also deleted"""
+        self.__del_all_attr()
+
+    @property
+    def quad_bearing(self):
+        """
+        Returns bearing call string as:  
+            - Departure (North or South)  
+            - Degrees  
+            - Minutes  
+            - Seconds  
+            - Latitude (East or West)  
+        ie: `N32°10'17"S`
+        """
+        return self.quad_bearing
+
+    @quad_bearing.setter
+    def set_quad_bearing(self,bearing_call: str):
+        """Sets the Quadrant Bearing value then recalculates the other formats"""
+        self.decimal_degree = parse_bearing(bearing_call)
+        self.radian = radians(self.decimal_degree)
+        self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
+        self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
+
+    @quad_bearing.deleter
+    def quad_bearing(self):
+        """if the quadrant bearing value is deleted, all other values are also deleted"""
+        self.__del_all_attr()
+
+    @property
+    def decimal_degree(self):
+        """Returns a float value that represents the decimal degrees clockwise from true north"""
+        return self.decimal_degree
+
+    @decimal_degree.setter
+    def decimal_degree(self,decimal_degree: float):
+        """Sets the Decimal Degree value then recalculates the other formats"""
+        self.decimal_degree = decimal_degree
+        self.radian = radians(self.decimal_degree)
+        self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
+        self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
+
+    @decimal_degree.deleter
+    def decimal_degree(self):
+        """if the decimal degree value is deleted, all other values are also deleted"""
+        self.__del_all_attr()
+
+    @property
+    def radian(self):
+        """Returns the Radian value calculated clockwise from True North"""
+        return self.radian
+
+    @radian.setter
+    def radian(self,radian: float):
+        """Sets the Radian Degree value then recalculates the other formats"""
+        self.radian = radian
+        self.decimal_degree = degrees(self.radian)
+        self.azimuth_bearing = decimal_degree_to_azimuth(self.decimal_degree)
+        self.quad_bearing = decimal_degree_to_quad_bearing(self.decimal_degree)
+
+    @radian.deleter
+    def radian(self):
+        """if the Radian value is deleted, all other values are also deleted"""
+        self.__del_all_attr()
+
+    def __del_all_attr(self):
+        """Clears out all attribute values"""
+        self.decimal_degree = None
+        self.radian = None
+        self.azimuth_bearing = None
+        self.quad_bearing = None
+
+
+
+
 
 def parse_bearing(bearing):
     r"""
