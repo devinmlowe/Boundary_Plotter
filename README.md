@@ -2,7 +2,7 @@
 # **Survey Bearing Conversion Tool**
 
 ### **Overview**
-This project is a Python-based library for parsing and converting survey bearings into different formats, designed to simplify handling and visualizing survey data. These tools are foundational components for a future system to visualize vectors and distances in software like **FreeCAD**, **Matplotlib**, **Excel**, and **AutoCAD**.
+This project is a Python-based library for parsing and converting survey bearings into different formats, designed to simplify handling and visualizing survey data. These tools are foundational components for a future system to output vectors and distances in for visualization in other more full-featured tools such as **FreeCAD**, **Matplotlib**, **Excel**, and **AutoCAD**.
 
 ---
 
