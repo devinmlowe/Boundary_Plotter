@@ -2,9 +2,7 @@
 tests for the angles.py module
 """
 from pytest import approx
-from angles import parse_bearing
-from angles import decimal_degree_to_azimuth
-from angles import decimal_degree_to_quad_bearing
+from angles import parse_bearing, decimal_degree_to_azimuth, decimal_degree_to_quad_bearing
 
 def test_parse_bearing_with_quad():
     """Tests output with Quadrant Supplied"""

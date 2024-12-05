@@ -5,5 +5,17 @@
 3. Interpret Start Coord and End Coord
 4. Interpret connected boundary
 
-
 """
+
+import subprocess
+
+def main():
+    """Entry point for application"""
+    try:
+        subprocess.run("python -m cli")
+    except KeyboardInterrupt:
+        print("\nExiting...")
+
+if __name__ == "__main__":
+    main()
+    
